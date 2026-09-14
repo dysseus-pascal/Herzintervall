@@ -163,6 +163,56 @@ braucht.
   dauerhaft niedrig bei gleichzeitig wenigen verworfenen, liefert der Sensor zu
   wenig; sind viele verworfen, ist der Filter zu eng.
 
+## Health Connect
+
+Jede brauchbare Messung geht per AppMessage ans Telefon, und die
+Companion-App unter `companion/` trägt sie in **Health Connect** ein. Dort gibt
+es `HeartRateVariabilityRmssdRecord` — RMSSD in Millisekunden, also genau das,
+was die Uhr misst. Nichts umzurechnen, nichts in ein fremdes Feld zu biegen.
+
+Eingetragen wird der Zeitpunkt der **Messung**, nicht der des Empfangs. Sonst
+stünden die Werte in der Akte um die Laufzeit der Übertragung verschoben.
+
+Messungen mit zu wenig sauberen Schlägen gehen gar nicht erst hinaus — die
+gehören in keine Gesundheitsakte.
+
+### Warum eine eigene App und nicht die Telefonseite
+
+PebbleKit JS kann nur HTTP sprechen und kommt an Health Connect nicht heran.
+Der einzige Zugang ist eine native Android-App. Und beides zugleich geht nicht:
+
+> PebbleKit JS cannot be used in conjunction with PebbleKit Android or
+> PebbleKit iOS.
+
+Deshalb hat Herzintervall **bewusst kein `src/pkjs/index.js`**. Läge eines im
+Projekt, gingen die Nachrichten dorthin und kämen bei der Companion-App nie an.
+
+Die gute Nachricht: die klassische PebbleKit-Schnittstelle läuft über
+gewöhnliche Broadcast-Intents (`com.getpebble.action.app.RECEIVE` mit `uuid`,
+`transaction_id` und `msg_data` als JSON). Die Companion-App braucht damit
+**keine einzige Pebble-Abhängigkeit** — ein Empfänger, ein JSON-Parser, ein
+Schreibzugriff. Nachgesehen in `coredevices/mobileapp`, `PebbleKitClassic.kt`.
+
+Damit die Pebble-App weiss, wohin: die Watchapp trägt das Paket unter
+`companionApp.android` in ihrer `package.json` ein.
+
+### APK
+
+Auf dem Entwicklungsrechner steht kein Android-SDK. Gebaut wird deshalb in
+GitHub Actions (`.github/workflows/companion.yml`); das APK hängt am Lauf und
+lässt sich von dort herunterladen und per Sideload installieren.
+
+**Dieser Lauf ist die einzige Prüfung, die es für die Companion-App gibt.** Er
+belegt, dass sie übersetzt und ein Paket ergibt — nicht, dass sie am Telefon das
+Richtige tut. Offen bleiben insbesondere:
+
+- ob die Core-App den klassischen Broadcast tatsächlich sendet
+- ob `com.getpebble.android.basalt` für das ACK das richtige Paket ist
+- der Erlaubnisablauf von Health Connect
+
+Nach dem Installieren: App einmal öffnen, Erlaubnis erteilen, dann auf der Uhr
+messen. Der Bildschirm der App zeigt danach, was ankam und was damit geschah.
+
 ## Herkunft
 
 Eigenentwicklung. Der Timeline-Look und die Bausteine (Seitenleiste,
