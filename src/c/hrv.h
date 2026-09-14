@@ -69,6 +69,10 @@ int hrv_duration(void);
 // Lief die letzte Messung als Nachtmessung?
 bool hrv_was_night(void);
 
+// Meldung, dass sich der Zustand der Uebergabe ans Telefon geklaert hat.
+// Danach schliesst sich eine vom Wecker gestartete Nachtmessung.
+void hrv_phone_settled(void);
+
 // Vorzeitig abbrechen und auswerten, was da ist.
 void hrv_stop(void);
 

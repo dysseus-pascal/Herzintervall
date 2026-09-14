@@ -218,13 +218,6 @@ static void prv_sidebar_update(Layer *layer, GContext *ctx) {
                      fonts_get_system_font(FONT_KEY_GOTHIC_14),
                      GRect(0, b.size.h / 2 - 9, b.size.w, 18),
                      GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
-  // Untere Taste, auf ihrer Hoehe
-  if (hrv_phase() != HrvMeasuring) {
-    graphics_draw_text(ctx, S(STR_HINT_TEST),
-                       fonts_get_system_font(FONT_KEY_GOTHIC_14),
-                       GRect(0, b.size.h * 3 / 4 - 9, b.size.w, 18),
-                       GTextOverflowModeTrailingEllipsis, GTextAlignmentCenter, NULL);
-  }
 }
 
 static Layer *s_sidebar;
@@ -243,25 +236,8 @@ static void prv_select(ClickRecognizerRef recognizer, void *context) {
   }
 }
 
-// Untere Taste: einen erfundenen, aber plausiblen Wert ans Telefon schicken.
-// Dient allein dazu, die Uebergabe zu pruefen, ohne jedes Mal eine Minute
-// stillzusitzen. Die Zahlen sind so gewaehlt, dass sie zueinander passen -
-// 60 Schlaege zu je 857 ms sind 70/min und decken 85 % einer Minute.
-static void prv_down(ClickRecognizerRef recognizer, void *context) {
-  if (hrv_phase() == HrvMeasuring) return;
-  HrvStats test;
-  hrv_stats_reset(&test);
-  test.accepted = 60;
-  test.rejected = 5;
-  test.sum_rr = 60 * 857;
-  phone_send_result(&test, 42, time(NULL));
-  vibes_short_pulse();
-  main_window_refresh();
-}
-
 static void prv_click_config(void *context) {
   window_single_click_subscribe(BUTTON_ID_SELECT, prv_select);
-  window_single_click_subscribe(BUTTON_ID_DOWN, prv_down);
 }
 
 static void prv_tick(struct tm *tick_time, TimeUnits units_changed) {

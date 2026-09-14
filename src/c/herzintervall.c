@@ -24,6 +24,11 @@ static void prv_glance_reload(AppGlanceReloadSession *session, size_t limit, voi
   app_glance_add_slice(session, slice);
 }
 
+static void prv_phone_changed(void) {
+  main_window_refresh();
+  hrv_phone_settled();
+}
+
 static void prv_init(void) {
   // Sprache der Uhr uebernehmen, bevor das erste Fenster Texte holt
   strings_refresh();
@@ -36,8 +41,9 @@ static void prv_init(void) {
 #endif
 
   phone_init();
-  // Aendert sich der Zustand der Uebergabe, muss der Schirm nachziehen.
-  phone_set_observer(main_window_refresh);
+  // Aendert sich der Zustand der Uebergabe, muss der Schirm nachziehen - und
+  // eine Nachtmessung weiss dann, dass sie fertig ist.
+  phone_set_observer(prv_phone_changed);
   hrv_init(main_window_refresh);
   main_window_push();
 

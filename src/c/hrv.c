@@ -71,11 +71,15 @@ static void prv_finish(void) {
   phone_send_result(&s_stats, rmssd, s_last_time ? s_last_time : time(NULL));
   prv_notify();
 
-  // Nach einer Nachtmessung die App wieder schliessen - sie wurde vom Wecker
-  // geoeffnet, nicht von Hand. Mit etwas Nachlauf, damit die Uebergabe ans
-  // Telefon noch durchgeht; sofortiges Beenden risse sie mittendrin ab.
+  // Eine vom Wecker gestartete Nachtmessung schliesst die App wieder. NICHT
+  // sofort: die Uebergabe ans Telefon laeuft noch, und ein Beenden mittendrin
+  // risse sie ab. Auf die Bestaetigung wird gewartet - hrv_phone_settled()
+  // macht dann Schluss.
+  //
+  // Der Zeitgeber hier ist nur der Rueckfall, falls weder Bestaetigung noch
+  // Fehlschlag je eintreffen. Sonst bliebe die App die ganze Nacht offen.
   if (s_night && s_quit_when_done) {
-    s_quit = app_timer_register(4000, prv_quit_cb, NULL);
+    s_quit = app_timer_register(20000, prv_quit_cb, NULL);
   }
 }
 
@@ -195,6 +199,19 @@ int hrv_duration(void) {
 
 bool hrv_was_night(void) {
   return s_night;
+}
+
+void hrv_phone_settled(void) {
+  if (!s_night || !s_quit_when_done || s_phase != HrvDone) return;
+  const PhoneStatus st = phone_status();
+  if (st != PhoneSent && st != PhoneFailed) return;   // noch unterwegs
+  if (s_quit) {
+    app_timer_cancel(s_quit);
+    s_quit = NULL;
+  }
+  // Ein Wimpernschlag, damit die Zustandszeile noch kurz stehenbleibt - falls
+  // doch jemand um fuenf hinsieht.
+  s_quit = app_timer_register(800, prv_quit_cb, NULL);
 }
 
 void hrv_stop(void) {
