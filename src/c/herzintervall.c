@@ -35,6 +35,8 @@ static void prv_init(void) {
 #endif
 
   phone_init();
+  // Aendert sich der Zustand der Uebergabe, muss der Schirm nachziehen.
+  phone_set_observer(main_window_refresh);
   hrv_init(main_window_refresh);
   main_window_push();
 }

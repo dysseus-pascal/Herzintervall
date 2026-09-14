@@ -1,6 +1,7 @@
 #include "main_window.h"
 #include "theme.h"
 #include "hrv.h"
+#include "phone.h"
 #include "strings.h"
 
 // Hauptscreen im Stil der Pebble-Timeline, wie Drinktervall und Flynformer:
@@ -170,6 +171,29 @@ static void prv_canvas_update(Layer *layer, GContext *ctx) {
                        fonts_get_system_font(wide ? FONT_KEY_GOTHIC_18 : FONT_KEY_GOTHIC_14),
                        GRect(margin, y, col_w, 40),
                        GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+  }
+
+  // Wie es der Uebergabe ans Telefon ergangen ist. Nur beim Ergebnis, und nur
+  // wenn ueberhaupt etwas hinausging - im Ruhezustand waere die Zeile eine
+  // Meldung ueber nichts.
+  if (phase == HrvDone && phone_status() != PhoneNothing) {
+    char line[40];
+    switch (phone_status()) {
+      case PhoneSent:
+        snprintf(line, sizeof(line), "%s", S(STR_TO_PHONE_OK));
+        break;
+      case PhoneFailed:
+        snprintf(line, sizeof(line), S(STR_TO_PHONE_FAIL), phone_fail_reason());
+        break;
+      default:
+        snprintf(line, sizeof(line), "%s", S(STR_TO_PHONE_WAIT));
+        break;
+    }
+    graphics_context_set_text_color(ctx, HZ_COLOR_DIM);
+    graphics_draw_text(ctx, line,
+                       fonts_get_system_font(FONT_KEY_GOTHIC_14),
+                       GRect(margin, b.size.h - PBL_IF_ROUND_ELSE(46, 26), col_w, 20),
+                       GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
   }
 
   // Balken unten, nur waehrend der Messung

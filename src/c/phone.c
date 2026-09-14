@@ -6,8 +6,19 @@
 #define OUTBOX_SIZE 128
 #define INBOX_SIZE  64
 
+static PhoneStatus s_status = PhoneNothing;
+static int s_reason;
+static void (*s_observer)(void);
+
+static void prv_changed(void) {
+  if (s_observer) s_observer();
+}
+
 static void prv_sent(DictionaryIterator *it, void *ctx) {
   APP_LOG(APP_LOG_LEVEL_INFO, "Ergebnis ans Telefon uebergeben");
+  s_status = PhoneSent;
+  s_reason = 0;
+  prv_changed();
 }
 
 static void prv_failed(DictionaryIterator *it, AppMessageResult reason, void *ctx) {
@@ -15,6 +26,21 @@ static void prv_failed(DictionaryIterator *it, AppMessageResult reason, void *ct
   // gerade nicht da. Beides ist zu erwarten und kein Fehler der App.
   APP_LOG(APP_LOG_LEVEL_WARNING, "Telefon nicht erreicht (%d) - Wert bleibt auf der Uhr",
           (int)reason);
+  s_status = PhoneFailed;
+  s_reason = (int)reason;
+  prv_changed();
+}
+
+PhoneStatus phone_status(void) {
+  return s_status;
+}
+
+int phone_fail_reason(void) {
+  return s_reason;
+}
+
+void phone_set_observer(void (*on_change)(void)) {
+  s_observer = on_change;
 }
 
 void phone_init(void) {
@@ -29,8 +55,14 @@ void phone_send_result(const HrvStats *st, uint16_t rmssd_ms, time_t when) {
   DictionaryIterator *out;
   if (app_message_outbox_begin(&out) != APP_MSG_OK) {
     APP_LOG(APP_LOG_LEVEL_WARNING, "Postausgang belegt - Ergebnis nicht geschickt");
+    s_status = PhoneFailed;
+    s_reason = (int)APP_MSG_BUSY;
+    prv_changed();
     return;
   }
+  s_status = PhoneSending;
+  s_reason = 0;
+  prv_changed();
 
   // Deckung in Prozent: wie viel der Messdauer die angenommenen Intervalle
   // zusammen ausfuellen. Dieselbe Rechnung wie auf dem Schirm, damit Uhr und

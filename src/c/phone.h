@@ -25,3 +25,36 @@ void phone_init(void);
 // als die Sache wert ist; eine verpasste Einzelmessung ist kein Verlust, der
 // sich nicht durch nochmal Messen beheben liesse.
 void phone_send_result(const HrvStats *st, uint16_t rmssd_ms, time_t when);
+
+// Wie es der letzten Uebergabe ergangen ist. Steht auf dem Ergebnisschirm,
+// weil es sonst niemand erfahren kann: Uhr-Logs liest man nur mit einem
+// Rechner am Kabel, und genau der fehlt unterwegs.
+//
+// WAS EIN "UEBERGEBEN" BEDEUTET - UND WAS NICHT: PhoneSent heisst, die
+// TELEFONSEITE hat bestaetigt. Es heisst NICHT, dass die Companion-App etwas
+// gesehen hat. Im Emulator steht die Zeile auf "uebergeben", obwohl dort gar
+// keine Companion-App existiert - die Telefon-Nachbildung bestaetigt von sich
+// aus. Dieselbe Annahme stand hier zuerst falsch im Kommentar, bis der erste
+// Emulatorlauf sie widerlegt hat.
+//
+// Brauchbar ist die Anzeige trotzdem, sogar sehr:
+//   PhoneFailed  -> es klemmt zwischen Uhr und Telefon. Sicherer Befund.
+//   PhoneSent    -> das Telefon hat es. Ob die Companion-App es bekam, sagt
+//                   allein DEREN Bildschirm. Damit sind die beiden moeglichen
+//                   Fehlerstellen sauber getrennt, ohne ein einziges Log.
+typedef enum {
+  PhoneNothing = 0,   //< noch nichts geschickt
+  PhoneSending,       //< unterwegs
+  PhoneSent,          //< von der Gegenseite bestaetigt
+  PhoneFailed,        //< keine Bestaetigung
+} PhoneStatus;
+
+PhoneStatus phone_status(void);
+
+// Grund des Fehlschlags (AppMessageResult), 0 wenn keiner. Die Zahl steht mit
+// auf dem Schirm: APP_MSG_SEND_TIMEOUT (64) heisst "keine Bestaetigung" und
+// ist etwas anderes als APP_MSG_NOT_CONNECTED (32) - "gar kein Telefon da".
+int phone_fail_reason(void);
+
+// Wird gerufen, wenn sich der Zustand aendert.
+void phone_set_observer(void (*on_change)(void));

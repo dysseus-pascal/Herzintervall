@@ -40,6 +40,14 @@ STR(STR_TOO_FEW,       0,  "Too few clean beats", "Zu wenig saubere Schläge")
 STR(STR_QUALITY_FMT,  40,  "%d dropped, %d%% covered", "%d verworfen, %d%% gedeckt")
 STR(STR_TRY_AGAIN,     0,  "Sit still and retry",  "Ruhig sitzen, nochmal")
 
+// --- Uebergabe ans Telefon ---
+// Steht auf dem Ergebnisschirm, damit sich ohne Rechner am Kabel feststellen
+// laesst, wo es klemmt. "Uebergeben" heisst dabei: die Companion-App hat den
+// Empfang bestaetigt, nicht bloss "abgeschickt".
+STR(STR_TO_PHONE_WAIT, 0,  "sending…",          "wird gesendet…")
+STR(STR_TO_PHONE_OK,   0,  "handed to phone",   "ans Telefon übergeben")
+STR(STR_TO_PHONE_FAIL,32,  "phone not reached (%d)", "Telefon nicht erreicht (%d)")
+
 // --- Kein HRV ---
 // EINE Meldung fuer beide Ursachen, weil die Uhr sie nicht unterscheidbar
 // macht: health_service_set_hrv_sample_period() gibt false zurueck, wenn der
