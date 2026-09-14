@@ -5,14 +5,16 @@ plugins {
 
 android {
     namespace = "ch.dysseus.herzintervall"
-    compileSdk = 35
+    // 36 ist Bedingung von androidx.health.connect:connect-client:1.1.0,
+    // nicht Geschmackssache.
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "ch.dysseus.herzintervall"
         // Health Connect verlangt mindestens 26; 28 ist eine bequeme Untergrenze
         // und deckt jedes Telefon ab, das die Pebble-App ueberhaupt betreibt.
         minSdk = 28
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "0.3.0"
     }
