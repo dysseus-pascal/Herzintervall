@@ -32,8 +32,7 @@ class PebbleReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != ACTION_RECEIVE) return
 
-        val uuid = intent.getStringExtra(EXTRA_UUID)
-        if (!sameUuid(uuid)) {
+        if (!isOurs(intent)) {
             // Der Broadcast gilt einer anderen Watchapp.
             return
         }
@@ -83,10 +82,28 @@ class PebbleReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun sameUuid(raw: String?): Boolean {
-        if (raw == null) return false
+    /**
+     * Die Pebble-App legt die UUID als java.util.UUID ins Intent, NICHT als
+     * Zeichenkette: putExtra(APP_UUID, appMessageData.uuid.toJavaUuid()) in
+     * PebbleKitClassic.kt. Ein getStringExtra() liefert dafuer null - und der
+     * Empfaenger verwarf damit jede Nachricht gleich in der ersten Zeile.
+     *
+     * Beide Formen werden gelesen, weil die klassische PebbleKit-Doku von
+     * einer Zeichenkette spricht und nicht auszuschliessen ist, dass eine
+     * andere Fassung es so macht.
+     */
+    private fun isOurs(intent: Intent): Boolean {
+        val want = UUID.fromString(WATCHAPP_UUID)
+        val raw: Any? = if (android.os.Build.VERSION.SDK_INT >= 33) {
+            intent.getSerializableExtra(EXTRA_UUID, UUID::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            intent.getSerializableExtra(EXTRA_UUID)
+        }
+        if (raw is UUID) return raw == want
+        val asText = raw as? String ?: intent.getStringExtra(EXTRA_UUID)
         return try {
-            UUID.fromString(raw) == UUID.fromString(WATCHAPP_UUID)
+            asText != null && UUID.fromString(asText) == want
         } catch (e: IllegalArgumentException) {
             false
         }
@@ -94,9 +111,18 @@ class PebbleReceiver : BroadcastReceiver() {
 
     private fun ackTo(context: Context, transactionId: Int) {
         if (transactionId < 0) return
+        // OHNE setPackage. Zuerst stand hier com.getpebble.android.basalt -
+        // das ist die alte Pebble-App; die Core-App heisst coredevices.coreapp
+        // (CLAUDE.md in coredevices/mobileapp). Das ACK ging damit an ein
+        // Paket, das es auf dem Telefon nicht gibt, die Uhr bekam nie eine
+        // Bestaetigung und meldete APP_MSG_SEND_TIMEOUT (2).
+        //
+        // Statt den Namen zu raten: gar keinen setzen. Die Pebble-App meldet
+        // ihren ACK-Empfaenger zur LAUFZEIT an, und solche Empfaenger
+        // bekommen implizite Broadcasts weiterhin - die Einschraenkung ab
+        // Android 8 gilt nur fuer im Manifest angemeldete.
         val ack = Intent(ACTION_RECEIVE_ACK).apply {
             putExtra(EXTRA_TRANSACTION_ID, transactionId)
-            setPackage(PEBBLE_PACKAGE)
         }
         context.sendBroadcast(ack)
     }
@@ -147,7 +173,10 @@ class PebbleReceiver : BroadcastReceiver() {
         const val EXTRA_UUID = "uuid"
         const val EXTRA_TRANSACTION_ID = "transaction_id"
         const val EXTRA_MSG_DATA = "msg_data"
-        const val PEBBLE_PACKAGE = "com.getpebble.android.basalt"
+        // Nur noch als Hinweis, wer der Gegenpart ist - gesetzt wird er nicht,
+        // siehe ackTo(). coredevices.coreapp ist die heutige App, die alte
+        // hiess com.getpebble.android.basalt.
+        const val CORE_APP_PACKAGE = "coredevices.coreapp"
     }
 }
 
