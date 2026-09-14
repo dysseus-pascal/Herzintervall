@@ -1,4 +1,4 @@
-# Baut die Android-Companion-App und haengt das APK an den Lauf.
+﻿# Baut die Android-Companion-App und haengt das APK an den Lauf.
 #
 # WARUM HIER UND NICHT LOKAL: auf dem Entwicklungsrechner steht kein
 # Android-SDK - dort laesst sich die App weder uebersetzen noch ausprobieren.
@@ -33,7 +33,7 @@ jobs:
           # interne Schnittstelle entfernt, auf die das Android-Plugin 8.x noch
           # baut ("relies on InternalProblems, removed in Gradle 9.6.0"). Der
           # Fehler nennt 9.5 selbst als die Fassung, die geht.
-          gradle-version: '9.5'
+          gradle-version: '9.5.1'
 
       - name: Uebersetzen
         working-directory: companion
