@@ -19,8 +19,13 @@ import java.util.UUID
  * drei Intent-Namen unten. Nachzulesen in coredevices/mobileapp unter
  * libpebble3/.../pebblekit/classic/PebbleKitClassic.kt.
  *
- * Damit die Pebble-App weiss, wohin: die Watchapp traegt diese App in ihrer
- * package.json unter companionApp.android.apps ein.
+ * Die Watchapp darf dafuer KEINEN companionApp-Eintrag in ihrer package.json
+ * haben. Das klingt verkehrt herum, ist aber genau richtig:
+ * CompanionAppLifecycleManager.android.kt entscheidet danach, welchen Weg die
+ * Pebble-App nimmt - liegt dort ein Paketname, nimmt sie PebbleKit2 und BINDET
+ * SICH AN EINEN DIENST in der Companion-App, statt zu senden. Ohne Eintrag
+ * nimmt sie PebbleKitClassic und sendet den Broadcast, auf den es hier
+ * ankommt. Ein Eintrag war die Ursache dafuer, dass zuerst gar nichts ankam.
  *
  * WICHTIG: eine Watchapp kann NICHT beides haben. "PebbleKit JS cannot be used
  * in conjunction with PebbleKit Android or PebbleKit iOS" - liegt ein

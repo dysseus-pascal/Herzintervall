@@ -1,7 +1,7 @@
 {
   "name": "herzintervall",
   "author": "dysseus-pascal",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "license": "CC0-1.0",
   "keywords": [
     "pebble-app"
@@ -27,13 +27,6 @@
       "COVERED",
       "WHEN"
     ],
-    "companionApp": {
-      "android": {
-        "apps": [
-          { "pkg": "ch.dysseus.herzintervall" }
-        ]
-      }
-    },
     "resources": {
       "media": []
     }

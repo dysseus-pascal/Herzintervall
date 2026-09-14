@@ -59,6 +59,9 @@ STR(STR_NO_HRV_SUB,    0,  "This watch delivers no beat intervals. On a Pebble T
 // --- Tastenhinweise in der Seitenleiste (kurz! die Leiste ist schmal) ---
 STR(STR_HINT_START,   14,  "Start",             "Start")
 STR(STR_HINT_STOP,    14,  "Stop",              "Stopp")
+// Untere Taste: schickt einen erfundenen Wert ans Telefon. Nur zum Pruefen der
+// Uebergabe - so muss man dafuer nicht jedes Mal eine Minute stillsitzen.
+STR(STR_HINT_TEST,    14,  "Test",              "Test")
 
 // --- App-Glance im Starter ---
 STR(STR_GLANCE_FMT,   48,  "RMSSD %d ms",       "RMSSD %d ms")

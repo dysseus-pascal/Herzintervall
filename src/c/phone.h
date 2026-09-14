@@ -10,11 +10,22 @@
 // und die Uhr muss nie von sich aus aufwachen.
 //
 // WOHIN DIE NACHRICHT GEHT: diese App hat KEIN src/pkjs/index.js. Ohne
-// JavaScript-Teil reicht die Pebble-App eingehende AppMessages an die
-// registrierten Companion-Apps weiter (package.json -> companionApp.android).
-// Beides zugleich geht nicht: "PebbleKit JS cannot be used in conjunction with
-// PebbleKit Android or PebbleKit iOS." Ein index.js hier waere also nicht
-// bloss ueberfluessig, es wuerde die Companion-App abklemmen.
+// JavaScript-Teil reicht die Pebble-App eingehende AppMessages an eine
+// Companion-App weiter. Beides zugleich geht nicht: "PebbleKit JS cannot be
+// used in conjunction with PebbleKit Android or PebbleKit iOS."
+//
+// UND KEIN companionApp-EINTRAG IN package.json. Das klingt verkehrt herum,
+// ist aber genau richtig - CompanionAppLifecycleManager.android.kt entscheidet
+// so:
+//
+//   hasAnyPebbleKit2CompanionApps = companionApp?.android?.apps?.any { pkg != null }
+//   if (hasAnyPebbleKit2CompanionApps) PebbleKit2(...) else PebbleKitClassic(...)
+//
+// Ein Eintrag dort schaltet also auf PebbleKit2 um, und das BINDET SICH AN
+// EINEN DIENST in der Companion-App, statt zu senden. Wer wie wir den
+// klassischen Broadcast empfaengt, darf dort nicht stehen. Genau daran lag es:
+// die Uhr meldete APP_MSG_SEND_TIMEOUT, weil sich die Pebble-App an einen
+// Dienst zu binden versuchte, den es nicht gibt.
 void phone_init(void);
 
 // Ein fertiges Ergebnis schicken.

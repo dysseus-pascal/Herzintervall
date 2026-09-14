@@ -26,6 +26,7 @@ Ein Bildschirm, eine Taste.
 | Taste | Aktion |
 |---|---|
 | Mitte | Messung starten, nochmal drücken bricht ab |
+| Unten | Testwert ans Telefon schicken (nur zum Prüfen der Übergabe) |
 | Zurück | App verlassen |
 
 Vier Zustände: **bereit** (der letzte Wert steht da), **Messung läuft**
@@ -193,8 +194,19 @@ gewöhnliche Broadcast-Intents (`com.getpebble.action.app.RECEIVE` mit `uuid`,
 **keine einzige Pebble-Abhängigkeit** — ein Empfänger, ein JSON-Parser, ein
 Schreibzugriff. Nachgesehen in `coredevices/mobileapp`, `PebbleKitClassic.kt`.
 
-Damit die Pebble-App weiss, wohin: die Watchapp trägt das Paket unter
-`companionApp.android` in ihrer `package.json` ein.
+**Und in `package.json` darf KEIN `companionApp` stehen.** Das klingt verkehrt
+herum. `CompanionAppLifecycleManager.android.kt` entscheidet danach:
+
+```kotlin
+val hasAnyPebbleKit2CompanionApps =
+    appInfo.companionApp?.android?.apps?.any { it.pkg != null } == true
+return if (hasAnyPebbleKit2CompanionApps) PebbleKit2(...) else PebbleKitClassic(...)
+```
+
+Ein Paketname dort schaltet auf **PebbleKit2** um, und das *bindet sich an einen
+Dienst* in der Companion-App, statt zu senden. Wer den klassischen Broadcast
+empfängt, darf dort nicht stehen. Genau dieser Eintrag war die Ursache dafür,
+dass anfangs gar nichts ankam und die Uhr `APP_MSG_SEND_TIMEOUT (2)` meldete.
 
 ### APK
 
