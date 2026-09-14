@@ -1,4 +1,5 @@
 #include "hrv.h"
+#include "phone.h"
 
 #define PERSIST_RMSSD 1
 #define PERSIST_TIME  2
@@ -53,6 +54,10 @@ static void prv_finish(void) {
   }
   APP_LOG(APP_LOG_LEVEL_INFO, "Messung fertig: %u ms aus %u Schlaegen (%u verworfen)",
           rmssd, (unsigned)s_stats.accepted, (unsigned)s_stats.rejected);
+  // Ans Telefon reichen, damit die Companion-App es in Health Connect
+  // schreiben kann. Nur ein brauchbares Ergebnis geht hinaus - eine Messung,
+  // die zu wenig saubere Schlaege hatte, gehoert in keine Gesundheitsakte.
+  phone_send_result(&s_stats, rmssd, s_last_time ? s_last_time : time(NULL));
   prv_notify();
 }
 

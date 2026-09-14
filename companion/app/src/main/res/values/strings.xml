@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Herzintervall</string>
+    <string name="intro">Nimmt die HRV-Messungen der Pebble Time 2 entgegen und trägt sie in Health Connect ein. Die App muss dafür nicht offen sein — sie wacht auf, wenn die Uhr etwas schickt.</string>
+    <string name="grant">Erlaubnis erteilen</string>
+    <string name="perm_ok">✓ Erlaubnis zum Schreiben liegt vor.</string>
+    <string name="perm_missing">✗ Erlaubnis zum Schreiben fehlt noch.</string>
+    <string name="hc_missing">Health Connect ist auf diesem Gerät nicht verfügbar. Ab Android 14 steckt es im System, davor braucht es die App aus dem Play Store.</string>
+    <string name="hc_update">Health Connect muss aktualisiert werden.</string>
+    <string name="nothing_yet">Noch keine Messung empfangen.</string>
+    <string name="last_reading">Letzte Messung, %1$s</string>
+    <string name="beats">Schläge</string>
+    <string name="quality">%1$d verworfen, %2$d%% gedeckt</string>
+</resources>

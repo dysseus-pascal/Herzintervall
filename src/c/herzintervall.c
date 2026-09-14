@@ -2,6 +2,7 @@
 #include "hrv.h"
 #include "hrv_selftest.h"
 #include "main_window.h"
+#include "phone.h"
 #include "strings.h"
 
 // App-Glance im Starter: der letzte RMSSD, damit man ihn sieht, ohne die App
@@ -33,6 +34,7 @@ static void prv_init(void) {
   hrv_selftest_run();
 #endif
 
+  phone_init();
   hrv_init(main_window_refresh);
   main_window_push();
 }

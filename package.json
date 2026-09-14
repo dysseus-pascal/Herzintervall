@@ -1,7 +1,7 @@
 {
   "name": "herzintervall",
   "author": "dysseus-pascal",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "license": "CC0-1.0",
   "keywords": [
     "pebble-app"
@@ -19,7 +19,21 @@
     "watchapp": {
       "watchface": false
     },
-    "messageKeys": [],
+    "messageKeys": [
+      "RMSSD",
+      "BPM",
+      "BEATS",
+      "DROPPED",
+      "COVERED",
+      "WHEN"
+    ],
+    "companionApp": {
+      "android": {
+        "apps": [
+          { "pkg": "ch.dysseus.herzintervall" }
+        ]
+      }
+    },
     "resources": {
       "media": []
     }

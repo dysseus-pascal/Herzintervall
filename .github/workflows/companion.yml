@@ -1,0 +1,41 @@
+# Baut die Android-Companion-App und haengt das APK an den Lauf.
+#
+# WARUM HIER UND NICHT LOKAL: auf dem Entwicklungsrechner steht kein
+# Android-SDK - dort laesst sich die App weder uebersetzen noch ausprobieren.
+# Dieser Lauf ist damit die einzige Pruefung, die es fuer sie gibt: er belegt,
+# dass sie uebersetzt und ein Paket ergibt. Dass sie am Telefon das Richtige
+# TUT, belegt er nicht.
+name: Companion-App bauen
+
+on:
+  push:
+    paths:
+      - 'companion/**'
+      - '.github/workflows/companion.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: JDK 17 bereitstellen
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Gradle bereitstellen
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Uebersetzen
+        working-directory: companion
+        run: gradle --no-daemon assembleDebug
+
+      - name: APK anhaengen
+        uses: actions/upload-artifact@v4
+        with:
+          name: herzintervall-companion-debug
+          path: companion/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error

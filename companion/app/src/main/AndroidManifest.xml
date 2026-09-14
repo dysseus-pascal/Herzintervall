@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Schreiben in Health Connect. Gelesen wird nichts: die App traegt nur
+         ein, was die Uhr gemessen hat. -->
+    <uses-permission android:name="android.permission.health.WRITE_HEART_RATE_VARIABILITY" />
+
+    <!-- Ab Android 11 muss ausdruecklich stehen, welche fremden Pakete man
+         ansprechen will - sonst sind sie unsichtbar. Health Connect ist bis
+         Android 13 eine eigene App, ab 14 Teil des Systems. -->
+    <queries>
+        <package android:name="com.google.android.apps.healthdata" />
+        <intent>
+            <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+        </intent>
+    </queries>
+
+    <application
+        android:allowBackup="true"
+        android:icon="@android:drawable/ic_menu_myplaces"
+        android:label="@string/app_name"
+        android:theme="@android:style/Theme.DeviceDefault.Light">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!-- Health Connect verlangt, dass die App erklaeren kann, wozu sie
+                 die Erlaubnis braucht (bis Android 13). -->
+            <intent-filter>
+                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+            </intent-filter>
+        </activity>
+
+        <!-- Dasselbe ab Android 14, wo Health Connect im System steckt. -->
+        <activity-alias
+            android:name="ViewPermissionUsageActivity"
+            android:exported="true"
+            android:targetActivity=".MainActivity"
+            android:permission="android.permission.START_VIEW_PERMISSION_USAGE">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW_PERMISSION_USAGE" />
+                <category android:name="android.intent.category.HEALTH_PERMISSIONS" />
+            </intent-filter>
+        </activity-alias>
+
+        <!-- Hier kommen die Messungen an. exported, weil der Broadcast von der
+             Pebble-App kommt und nicht von uns selbst. -->
+        <receiver
+            android:name=".PebbleReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.getpebble.action.app.RECEIVE" />
+            </intent-filter>
+        </receiver>
+
+    </application>
+</manifest>
