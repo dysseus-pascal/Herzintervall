@@ -8,6 +8,8 @@
 #   fake       -DHZ_FAKE_BEATS  erfundene Schlagintervalle, damit sich der
 #                               Ablauf im Emulator durchspielen laesst
 #   both       beides
+#   night      -DHZ_TEST_NIGHT  Wecker in 1 Minute statt um 5 Uhr, Messung 20 s
+#              (zusammen mit fake, sonst gibt es im Emulator keine Schlaege)
 # Alle nur in der WSL-KOPIE; die Windows-Quelle bleibt unberuehrt.
 export PATH=$HOME/.local/bin:$PATH
 SRC="${1:-$HERZINTERVALL_SRC}"
@@ -34,6 +36,7 @@ case "$MODE" in
   selftest) FLAGS="-DHZ_SELFTEST" ;;
   fake)     FLAGS="-DHZ_FAKE_BEATS" ;;
   both)     FLAGS="-DHZ_SELFTEST -DHZ_FAKE_BEATS" ;;
+  night)    FLAGS="-DHZ_FAKE_BEATS -DHZ_TEST_NIGHT" ;;
 esac
 if [ -n "$FLAGS" ]; then
   # Anker ist eine Zeile, die es NUR in build() gibt. ctx.load('pebble_sdk')

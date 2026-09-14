@@ -2,6 +2,7 @@
 #include "hrv.h"
 #include "hrv_selftest.h"
 #include "main_window.h"
+#include "night.h"
 #include "phone.h"
 #include "strings.h"
 
@@ -39,6 +40,18 @@ static void prv_init(void) {
   phone_set_observer(main_window_refresh);
   hrv_init(main_window_refresh);
   main_window_push();
+
+  // Hat uns der Wecker geoeffnet, sofort messen - drei Minuten statt einer.
+  // Die App schliesst sich danach von selbst wieder (siehe hrv.c).
+  //
+  // Der Wecker wird bei JEDEM Start neu gestellt, nicht nur hier: so haelt er
+  // sich selbst aktuell, auch nach einem Neustart der Uhr oder einer
+  // Zeitumstellung, und es sammeln sich keine alten an.
+  if (night_launched_us()) {
+    APP_LOG(APP_LOG_LEVEL_INFO, "Vom Wecker geoeffnet - Nachtmessung");
+    hrv_start_night();
+  }
+  night_schedule();
 }
 
 static void prv_deinit(void) {

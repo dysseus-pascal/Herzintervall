@@ -41,6 +41,30 @@ gemeldet hat. Die beiden Zahlen nebeneinander sagen, welches von beidem.
 
 Der letzte Wert überlebt das Beenden und steht auch im App-Glance des Starters.
 
+## Nachts um fünf
+
+Die App misst **jede Nacht um 5 Uhr von selbst, drei Minuten lang**. Dafür ist
+nichts einzustellen; der Wecker stellt sich bei jedem Start neu und übersteht so
+Neustarts und Zeitumstellungen.
+
+HRV im Schlaf ist der Wert, den auch Garmin, Whoop und Oura ausweisen: er hängt
+weniger an Haltung, Atmung und Tagesform als eine wache Minute im Sitzen, und
+drei Minuten liefern deutlich mehr Intervallpaare als eine. Genau das macht den
+Wert von Tag zu Tag vergleichbar — was bei HRV das einzige ist, was zählt.
+
+**Der Schirm geht dabei kurz an.** Ein Pebble-Wakeup startet die App im
+Vordergrund; einen stillen Hintergrundlauf gibt es nicht (der Worker-Prozess
+käme zwar an den Sensor, aber nicht an AppMessage). Nach der Messung schliesst
+sich die App von selbst wieder.
+
+War die Uhr um fünf aus, wird die Messung beim Einschalten nachgeholt
+(`notify_if_missed`) — lieber eine verspätete als gar keine.
+
+Geprüft mit `tools/test_night.sh`: Wecker in einer Minute statt um fünf, Messung
+20 s statt 180. Der Emulator zeigt den ganzen Weg — App verlassen, Wecker
+öffnet sie wieder, Messung läuft, Ergebnis geht ans Telefon, App schliesst sich,
+Uhr zurück auf dem Zifferblatt.
+
 ## Was gemessen wird
 
 **RMSSD** — die Wurzel aus dem Mittel der quadrierten Unterschiede

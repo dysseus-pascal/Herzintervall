@@ -67,7 +67,9 @@ void phone_send_result(const HrvStats *st, uint16_t rmssd_ms, time_t when) {
   // Deckung in Prozent: wie viel der Messdauer die angenommenen Intervalle
   // zusammen ausfuellen. Dieselbe Rechnung wie auf dem Schirm, damit Uhr und
   // Telefon nicht zwei verschiedene Zahlen zeigen.
-  uint32_t covered = (st->sum_rr / 10) / HZ_MEASURE_S;
+  // Mit der Dauer der TATSAECHLICHEN Messung rechnen, nicht mit der von
+  // Hand gestarteten - sonst zeigte die Nachtmessung ein Drittel der Wahrheit.
+  uint32_t covered = (st->sum_rr / 10) / hrv_duration();
   if (covered > 100) covered = 100;
 
   dict_write_int32(out, MESSAGE_KEY_RMSSD,   (int32_t)rmssd_ms);

@@ -200,7 +200,7 @@ static void prv_canvas_update(Layer *layer, GContext *ctx) {
   if (phase == HrvMeasuring) {
     const int16_t by = b.size.h - BAR_H - PBL_IF_ROUND_ELSE(28, 8);
     prv_draw_bar(ctx, GRect(margin, by, col_w, BAR_H),
-                 HZ_MEASURE_S - hrv_seconds_left(), HZ_MEASURE_S);
+                 hrv_duration() - hrv_seconds_left(), hrv_duration());
   }
 }
 

@@ -1,5 +1,6 @@
 #include "hrv.h"
 #include "phone.h"
+#include "night.h"
 
 #define PERSIST_RMSSD 1
 #define PERSIST_TIME  2
@@ -9,6 +10,16 @@ static HrvStats s_stats;
 static HrvChanged s_changed;
 static AppTimer *s_tick;
 static int s_left;
+static int s_duration = HZ_MEASURE_S;
+static bool s_night;
+static bool s_quit_when_done;
+static AppTimer *s_quit;
+
+static void prv_quit_cb(void *data) {
+  s_quit = NULL;
+  APP_LOG(APP_LOG_LEVEL_INFO, "Nachtmessung beendet, App schliesst");
+  window_stack_pop_all(false);
+}
 static uint16_t s_last_rmssd;
 static time_t s_last_time;
 
@@ -59,6 +70,13 @@ static void prv_finish(void) {
   // die zu wenig saubere Schlaege hatte, gehoert in keine Gesundheitsakte.
   phone_send_result(&s_stats, rmssd, s_last_time ? s_last_time : time(NULL));
   prv_notify();
+
+  // Nach einer Nachtmessung die App wieder schliessen - sie wurde vom Wecker
+  // geoeffnet, nicht von Hand. Mit etwas Nachlauf, damit die Uebergabe ans
+  // Telefon noch durchgeht; sofortiges Beenden risse sie mittendrin ab.
+  if (s_night && s_quit_when_done) {
+    s_quit = app_timer_register(4000, prv_quit_cb, NULL);
+  }
 }
 
 static void prv_tick_cb(void *data) {
@@ -118,6 +136,10 @@ void hrv_deinit(void) {
     app_timer_cancel(s_tick);
     s_tick = NULL;
   }
+  if (s_quit) {
+    app_timer_cancel(s_quit);
+    s_quit = NULL;
+  }
 #ifdef HZ_FAKE_BEATS
   if (s_fake) {
     app_timer_cancel(s_fake);
@@ -128,9 +150,11 @@ void hrv_deinit(void) {
   health_service_events_unsubscribe();
 }
 
-bool hrv_start(void) {
+static bool prv_start(int seconds, bool night) {
   hrv_stats_reset(&s_stats);
-  s_left = HZ_MEASURE_S;
+  s_duration = seconds;
+  s_night = night;
+  s_left = seconds;
 
   if (!health_service_set_hrv_sample_period(HZ_SAMPLE_S)) {
     // Zwei Ursachen, von aussen nicht unterscheidbar: kein HRV-faehiger Sensor
@@ -152,6 +176,25 @@ bool hrv_start(void) {
 #endif
   prv_notify();
   return true;
+}
+
+bool hrv_start(void) {
+  return prv_start(HZ_MEASURE_S, false);
+}
+
+bool hrv_start_night(void) {
+  // Nur beenden, wenn uns der Wecker geoeffnet hat. Wer die Nachtmessung von
+  // Hand anstoesst, will danach nicht aus der App geworfen werden.
+  s_quit_when_done = night_launched_us();
+  return prv_start(HZ_NIGHT_S, true);
+}
+
+int hrv_duration(void) {
+  return s_duration;
+}
+
+bool hrv_was_night(void) {
+  return s_night;
 }
 
 void hrv_stop(void) {
