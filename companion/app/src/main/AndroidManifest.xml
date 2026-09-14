@@ -5,6 +5,13 @@
          ein, was die Uhr gemessen hat. -->
     <uses-permission android:name="android.permission.health.WRITE_HEART_RATE_VARIABILITY" />
 
+    <!-- Der Empfaenger muss zur LAUFZEIT angemeldet sein (impliziter Broadcast,
+         siehe ReceiverService), und das braucht einen laufenden Prozess. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
     <!-- Ab Android 11 muss ausdruecklich stehen, welche fremden Pakete man
          ansprechen will - sonst sind sie unsichtbar. Health Connect ist bis
          Android 13 eine eigene App, ab 14 Teil des Systems. -->
@@ -47,8 +54,25 @@
             </intent-filter>
         </activity-alias>
 
-        <!-- Hier kommen die Messungen an. exported, weil der Broadcast von der
-             Pebble-App kommt und nicht von uns selbst. -->
+        <!-- Meldet den Empfaenger zur Laufzeit an und haelt ihn am Leben. -->
+        <service
+            android:name=".ReceiverService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+        <!-- Nach einem Neustart den Dienst wieder hochfahren, sonst verpasst
+             man die naechste Messung, ohne es zu merken. -->
+        <receiver
+            android:name=".BootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Der Eintrag im Manifest bleibt, schadet nicht und greift auf
+             Android 7 und aelter. Ab Android 8 erreicht ihn der implizite
+             Broadcast der Pebble-App NICHT - dafuer ist der Dienst da. -->
         <receiver
             android:name=".PebbleReceiver"
             android:exported="true">

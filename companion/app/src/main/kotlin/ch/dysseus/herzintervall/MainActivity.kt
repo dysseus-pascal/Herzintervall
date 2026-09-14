@@ -1,5 +1,7 @@
 package ch.dysseus.herzintervall
 
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.ViewGroup
@@ -35,6 +37,20 @@ class MainActivity : ComponentActivity() {
         val contract: ActivityResultContract<Set<String>, Set<String>> =
             PermissionController.createRequestPermissionResultContract()
         permissionLauncher = registerForActivityResult(contract) { refresh() }
+
+        // Ab Android 13 muss die Meldung des Vordergrunddienstes erlaubt sein.
+        // Ohne sie laeuft der Dienst zwar, aber das System darf ihn frueher
+        // beenden - und man sieht nicht, dass er ueberhaupt da ist.
+        if (Build.VERSION.SDK_INT >= 33 &&
+            checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 1)
+        }
+
+        // Der Empfaenger muss zur Laufzeit angemeldet sein, sonst erreicht
+        // ihn der implizite Broadcast der Pebble-App nicht. Siehe
+        // ReceiverService.
+        ReceiverService.start(this)
 
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -98,6 +114,8 @@ class MainActivity : ComponentActivity() {
             false
         }
         sb.append(getString(if (granted) R.string.perm_ok else R.string.perm_missing))
+        sb.append("\n")
+        sb.append(getString(R.string.service_hint))
         sb.append("\n\n")
 
         val last = Store(this).last()

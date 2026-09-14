@@ -116,17 +116,20 @@ class PebbleReceiver : BroadcastReceiver() {
 
     private fun ackTo(context: Context, transactionId: Int) {
         if (transactionId < 0) return
-        // OHNE setPackage. Zuerst stand hier com.getpebble.android.basalt -
-        // das ist die alte Pebble-App; die Core-App heisst coredevices.coreapp
-        // (CLAUDE.md in coredevices/mobileapp). Das ACK ging damit an ein
-        // Paket, das es auf dem Telefon nicht gibt, die Uhr bekam nie eine
-        // Bestaetigung und meldete APP_MSG_SEND_TIMEOUT (2).
+        // DIE RICHTIGE LEITUNG IST ...app.ACK, NICHT ...app.RECEIVE_ACK.
+        // PebbleKitClassic.kt lauscht fuer die Bestaetigung einer eingehenden
+        // Nachricht auf INTENT_APP_ACK:
         //
-        // Statt den Namen zu raten: gar keinen setzen. Die Pebble-App meldet
-        // ihren ACK-Empfaenger zur LAUFZEIT an, und solche Empfaenger
-        // bekommen implizite Broadcasts weiterhin - die Einschraenkung ab
-        // Android 8 gilt nur fuer im Manifest angemeldete.
-        val ack = Intent(ACTION_RECEIVE_ACK).apply {
+        //     IntentFilter(INTENT_APP_ACK).asFlow(context, exported = true)
+        //         .collect { replyACK(...) }
+        //
+        // RECEIVE_ACK ist die GEGENRICHTUNG - das schickt die Pebble-App
+        // hinaus, wenn die Uhr eine Nachricht vom Telefon bestaetigt hat. Ein
+        // ACK dorthin hoert niemand, und die Uhr lief in APP_MSG_SEND_TIMEOUT.
+        //
+        // Kein setPackage: der Empfaenger der Pebble-App ist zur Laufzeit
+        // angemeldet und bekommt implizite Broadcasts.
+        val ack = Intent(ACTION_ACK).apply {
             putExtra(EXTRA_TRANSACTION_ID, transactionId)
         }
         context.sendBroadcast(ack)
@@ -174,13 +177,12 @@ class PebbleReceiver : BroadcastReceiver() {
         const val KEY_WHEN = 10005
 
         const val ACTION_RECEIVE = "com.getpebble.action.app.RECEIVE"
-        const val ACTION_RECEIVE_ACK = "com.getpebble.action.app.RECEIVE_ACK"
+        // Bestaetigung einer Nachricht, die von der UHR kam.
+        const val ACTION_ACK = "com.getpebble.action.app.ACK"
         const val EXTRA_UUID = "uuid"
         const val EXTRA_TRANSACTION_ID = "transaction_id"
         const val EXTRA_MSG_DATA = "msg_data"
-        // Nur noch als Hinweis, wer der Gegenpart ist - gesetzt wird er nicht,
-        // siehe ackTo(). coredevices.coreapp ist die heutige App, die alte
-        // hiess com.getpebble.android.basalt.
+        // Nur als Hinweis, wer der Gegenpart ist - gesetzt wird er nirgends.
         const val CORE_APP_PACKAGE = "coredevices.coreapp"
     }
 }

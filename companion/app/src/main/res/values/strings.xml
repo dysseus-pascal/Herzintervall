@@ -8,6 +8,9 @@
     <string name="hc_missing">Health Connect ist auf diesem Gerät nicht verfügbar. Ab Android 14 steckt es im System, davor braucht es die App aus dem Play Store.</string>
     <string name="hc_update">Health Connect muss aktualisiert werden.</string>
     <string name="nothing_yet">Noch keine Messung empfangen.</string>
+    <string name="channel_name">Empfang</string>
+    <string name="service_running">Wartet auf Messungen der Uhr</string>
+    <string name="service_hint">Der Empfang läuft im Hintergrund weiter; die Meldung in der Leiste gehört dazu.</string>
     <string name="last_reading">Letzte Messung, %1$s</string>
     <string name="beats">Schläge</string>
     <string name="quality">%1$d verworfen, %2$d%% gedeckt</string>
