@@ -28,6 +28,12 @@ jobs:
 
       - name: Gradle bereitstellen
         uses: gradle/actions/setup-gradle@v4
+        with:
+          # Festgenagelt, nicht dem Neuesten ueberlassen: Gradle 9.6 hat eine
+          # interne Schnittstelle entfernt, auf die das Android-Plugin 8.x noch
+          # baut ("relies on InternalProblems, removed in Gradle 9.6.0"). Der
+          # Fehler nennt 9.5 selbst als die Fassung, die geht.
+          gradle-version: '9.5'
 
       - name: Uebersetzen
         working-directory: companion
