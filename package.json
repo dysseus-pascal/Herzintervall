@@ -1,0 +1,27 @@
+{
+  "name": "herzintervall",
+  "author": "dysseus-pascal",
+  "version": "0.1.0",
+  "license": "CC0-1.0",
+  "keywords": [
+    "pebble-app"
+  ],
+  "private": true,
+  "dependencies": {},
+  "pebble": {
+    "displayName": "Herzintervall",
+    "uuid": "7e1b28b2-cd13-4b50-ac4e-187b92707707",
+    "sdkVersion": "3",
+    "enableMultiJS": true,
+    "targetPlatforms": [
+      "emery"
+    ],
+    "watchapp": {
+      "watchface": false
+    },
+    "messageKeys": [],
+    "resources": {
+      "media": []
+    }
+  }
+}
