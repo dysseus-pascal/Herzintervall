@@ -214,16 +214,37 @@ Auf dem Entwicklungsrechner steht kein Android-SDK. Gebaut wird deshalb in
 GitHub Actions (`.github/workflows/companion.yml`); das APK hängt am Lauf und
 lässt sich von dort herunterladen und per Sideload installieren.
 
-**Dieser Lauf ist die einzige Prüfung, die es für die Companion-App gibt.** Er
-belegt, dass sie übersetzt und ein Paket ergibt — nicht, dass sie am Telefon das
-Richtige tut. Offen bleiben insbesondere:
+Nach dem Installieren: App einmal öffnen (das startet den Empfangsdienst),
+Erlaubnis erteilen, dann auf der Uhr messen — oder die untere Taste drücken, die
+schickt sofort einen Testwert.
 
-- ob die Core-App den klassischen Broadcast tatsächlich sendet
-- ob `com.getpebble.android.basalt` für das ACK das richtige Paket ist
-- der Erlaubnisablauf von Health Connect
+**Die Signatur wechselt bei jedem CI-Lauf**, weil GitHub Actions jedes Mal einen
+frischen Debug-Schlüssel erzeugt. Eine neue Fassung lässt sich deshalb nicht
+über die alte installieren; vorher deinstallieren. Verloren geht dabei nichts —
+der einzige Zustand der App ist die zuletzt empfangene Messung, und die steht in
+Health Connect.
 
-Nach dem Installieren: App einmal öffnen, Erlaubnis erteilen, dann auf der Uhr
-messen. Der Bildschirm der App zeigt danach, was ankam und was damit geschah.
+### Auf dem Telefon bestätigt
+
+Die ganze Kette läuft: Uhr → Telefon → Companion → Health Connect.
+
+Bis dahin lagen vier eigene Fehler im Weg, alle vier durch Lesen der Quelle von
+`coredevices/mobileapp` gefunden — kein einziger durch Raten, und keiner wäre
+mit einem Log schneller gefunden worden:
+
+1. **Die UUID ist kein Text.** `putExtra(APP_UUID, uuid.toJavaUuid())` legt ein
+   `java.util.UUID` ins Intent; `getStringExtra` liefert dafür `null`, und der
+   Empfänger verwarf jede Nachricht in der ersten Zeile.
+2. **`companionApp` in `package.json` schaltet den Broadcast ab.** Ein Eintrag
+   dort wählt PebbleKit2, das sich an einen *Dienst* bindet statt zu senden.
+3. **Der Broadcast ist implizit.** Seit Android 8 erreicht er im Manifest
+   angemeldete Empfänger nicht mehr — es braucht einen zur Laufzeit
+   angemeldeten, und damit einen Vordergrunddienst.
+4. **Der ACK gehört auf `…app.ACK`**, nicht auf `…app.RECEIVE_ACK`. Letzteres
+   ist die Gegenrichtung; dort hört niemand zu, und die Uhr lief in
+   `APP_MSG_SEND_TIMEOUT (2)`.
+
+Jeder einzelne davon hätte gereicht, damit nichts ankommt.
 
 ## Herkunft
 
