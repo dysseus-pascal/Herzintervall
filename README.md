@@ -30,8 +30,13 @@ Ein Bildschirm, eine Taste.
 
 Vier Zustände: **bereit** (der letzte Wert steht da), **Messung läuft**
 (Restsekunden gross, darunter gezählte und verworfene Schläge, unten ein
-Balken), **Ergebnis** (RMSSD gross, mittlerer Puls und Anzahl darunter) und
-**kein HRV**, wenn die Uhr keine Intervalle liefert.
+Balken), **Ergebnis** (RMSSD gross, darunter mittlerer Puls und Anzahl, und eine Zeile
+zur Güte der Messung) und **kein HRV**, wenn die Uhr keine Intervalle liefert.
+
+Die Gütezeile nennt **verworfene Schläge** und **Deckung** — wie viel der Minute
+die angenommenen Intervalle zusammen ausfüllen. Bleibt viel übrig, fehlen
+Schläge: entweder weil der Filter sie verworfen hat oder weil der Sensor sie nie
+gemeldet hat. Die beiden Zahlen nebeneinander sagen, welches von beidem.
 
 Der letzte Wert überlebt das Beenden und steht auch im App-Glance des Starters.
 
@@ -131,19 +136,32 @@ zeigt also den echten Fehlerweg ungetrickst — und einmal mit
 Gezeichnet und gerechnet wird dabei dasselbe wie im Betrieb; nur die Herkunft
 der Zahlen ist gefälscht.
 
-## Was hier NICHT geprüft ist
+## Auf der Uhr
 
-Der Sensor. Es gibt auf diesem Rechner keinen Weg dazu — kein Emulator bildet
-ihn nach. Ungeprüft bleibt damit alles, was erst am Handgelenk entsteht:
+Erste Messung auf einer echten Pebble Time 2 (0.1.0): **RMSSD 37 ms, 74/min,
+61 Schläge**. Die Zahlen sind untereinander stimmig — 61 Schläge zu je rund
+811 ms decken etwa 49,5 der 60 Sekunden ab, die Kette ist also zu gut vier
+Fünfteln lückenlos. Der Sensor liefert, der Filter lässt das meiste durch, und
+der RMSSD stammt aus echten aufeinanderfolgenden Paaren.
 
-- ob `health_service_set_hrv_sample_period(1)` auf der echten Uhr angenommen wird
-- wie dicht die Intervalle tatsächlich eintreffen
-- wie viele der Filter bei echtem PPG-Rauschen verwirft
-- ob ein Ereignis verlorengeht, wenn zwei Intervalle dicht aufeinander folgen
-  (`peek` liefert immer nur das letzte — mit der öffentlichen API ist das nicht
-  zu umgehen)
+Damit ist belegt, dass die Kette trägt. **Nicht** belegt ist, ob 37 ms richtig
+sind — dazu bräuchte es einen Brustgurt als Referenz.
 
-Das muss der erste Lauf auf der Uhr zeigen.
+Aus diesem Lauf kam die Gütezeile in 0.2.0: die Zahl der verworfenen Intervalle
+stand nur während der Messung da und fehlte ausgerechnet im Ergebnis, wo man sie
+braucht.
+
+## Was weiterhin ungeprüft ist
+
+- die **Genauigkeit** gegen eine Referenzmessung
+- ob ein Ereignis verlorengeht, wenn zwei Intervalle dicht aufeinander folgen.
+  `health_service_peek_hrv_ppi_ms()` liefert immer nur das letzte; kommt ein
+  zweites, bevor der Handler läuft, ist das erste weg. Mit der öffentlichen API
+  ist das nicht zu umgehen und von aussen auch nicht zu messen — die Deckung in
+  der Gütezeile ist der beste Anhaltspunkt, den es dafür gibt.
+- ob der 20-%-Filter bei starkem PPG-Rauschen zu streng ist. Liegt die Deckung
+  dauerhaft niedrig bei gleichzeitig wenigen verworfenen, liefert der Sensor zu
+  wenig; sind viele verworfen, ist der Filter zu eng.
 
 ## Herkunft
 

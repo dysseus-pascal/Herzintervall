@@ -127,6 +127,7 @@ static void prv_canvas_update(Layer *layer, GContext *ctx) {
 
   // Titel und Nebenzeile
   char title[40];
+  char sub_buf[40];
   const char *sub = NULL;
   if (phase == HrvMeasuring) {
     if (st->accepted == 0) {
@@ -139,6 +140,14 @@ static void prv_canvas_update(Layer *layer, GContext *ctx) {
     if (hrv_rmssd_ms(st) > 0) {
       snprintf(title, sizeof(title), S(STR_RESULT_FMT),
                (int)hrv_mean_bpm(st), (int)st->accepted);
+      // Deckung: wie viel der Messdauer die angenommenen Intervalle zusammen
+      // ausfuellen. Bleibt viel uebrig, fehlen Schlaege - entweder weil der
+      // Filter sie verworfen hat oder weil der Sensor sie nie gemeldet hat.
+      // Die beiden Zahlen nebeneinander sagen, welches von beidem.
+      const uint32_t covered = (st->sum_rr / 10) / (HZ_MEASURE_S ? HZ_MEASURE_S : 1);
+      snprintf(sub_buf, sizeof(sub_buf), S(STR_QUALITY_FMT),
+               (int)st->rejected, (int)(covered > 100 ? 100 : covered));
+      sub = sub_buf;
     } else {
       snprintf(title, sizeof(title), "%s", S(STR_TOO_FEW));
       sub = S(STR_TRY_AGAIN);

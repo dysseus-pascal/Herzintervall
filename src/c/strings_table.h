@@ -34,6 +34,10 @@ STR(STR_BEATS_FMT,    40,  "%d beats, %d dropped", "%d Schläge, %d raus")
 STR(STR_RMSSD,         0,  "RMSSD in ms",       "RMSSD in ms")
 STR(STR_RESULT_FMT,   40,  "%d bpm, %d beats",  "%d/min, %d Schläge")
 STR(STR_TOO_FEW,       0,  "Too few clean beats", "Zu wenig saubere Schläge")
+// Wie viel von der Minute wirklich abgedeckt ist. Ohne diese Zeile sieht man
+// dem Ergebnis nicht an, ob der Filter viel wegwerfen musste oder ob der
+// Sensor gar nicht erst geliefert hat - und das sind zwei verschiedene Dinge.
+STR(STR_QUALITY_FMT,  40,  "%d dropped, %d%% covered", "%d verworfen, %d%% gedeckt")
 STR(STR_TRY_AGAIN,     0,  "Sit still and retry",  "Ruhig sitzen, nochmal")
 
 // --- Kein HRV ---
