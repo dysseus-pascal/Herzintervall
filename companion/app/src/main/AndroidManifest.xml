@@ -2,8 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Schreiben in Health Connect. Gelesen wird nichts: die App traegt nur
-         ein, was die Uhr gemessen hat. -->
+         ein, was die Uhren melden - HRV von Herzintervall, getrunkenes Wasser
+         von Drinktervall. -->
     <uses-permission android:name="android.permission.health.WRITE_HEART_RATE_VARIABILITY" />
+    <uses-permission android:name="android.permission.health.WRITE_HYDRATION" />
 
     <!-- Der Empfaenger muss zur LAUFZEIT angemeldet sein (impliziter Broadcast,
          siehe ReceiverService), und das braucht einen laufenden Prozess. -->
