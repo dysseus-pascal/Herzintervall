@@ -57,9 +57,13 @@ echo "----- Log -----"
 grep -iE "Nachtmessung|Wecker|Messung fertig|Telefon|schliesst" "$LOG" | sed 's/^\[[^]]*\] [^ ]*> //' | head -12
 echo "---------------"
 
-D="$HOME/shots"
-rm -rf "$D"; mkdir -p "$D"; cp "$OUT"/*.png "$D/" 2>/dev/null
-echo "$(ls "$D" | wc -l) Bilder"
+# Die Bilder liegen unter $OUT. Wer sie anderswo braucht, setzt
+# HZ_SHOTS auf ein Zielverzeichnis - ein fester Pfad hier hinge an genau
+# einem Rechner.
+if [ -n "$HZ_SHOTS" ]; then
+  mkdir -p "$HZ_SHOTS"; cp "$OUT"/*.png "$HZ_SHOTS/" 2>/dev/null
+fi
+echo "$(ls "$OUT" | wc -l) Bilder in $OUT"
 
 # Sauberen Stand wiederherstellen.
 sh "$SRC/tools/sync_herzintervall.sh" "$SRC" >/dev/null 2>&1
