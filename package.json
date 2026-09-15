@@ -1,7 +1,7 @@
 {
   "name": "herzintervall",
   "author": "dysseus-pascal",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "license": "CC0-1.0",
   "keywords": [
     "pebble-app"
@@ -28,7 +28,14 @@
       "WHEN"
     ],
     "resources": {
-      "media": []
+      "media": [
+        {
+          "menuIcon": true,
+          "type": "bitmap",
+          "name": "IMAGE_ICON",
+          "file": "images/system_icon.png"
+        }
+      ]
     }
   }
 }
