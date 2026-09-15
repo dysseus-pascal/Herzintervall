@@ -1,22 +1,30 @@
 #!/usr/bin/env python3
-"""App-Symbol: das Herz (25x25).
+"""App-Symbol: die drei Buchstaben HRV (25x25).
 
 Aufruf: make_app_icon.py <zielordner>
-Erzeugt system_icon.png - schwarze Konturlinie auf durchsichtigem Grund.
+Erzeugt system_icon.png - schwarze Linien auf durchsichtigem Grund.
 
-Aufgebaut wie prv_draw_heart in src/c/main_window.c: zwei Kreise nebeneinander
-und ein Dreieck darunter. Nicht nachempfunden, sondern dieselbe Konstruktion -
-was auf der Uhr steht, steht auch im Starter.
+Kein Herz mehr. Ein Herz sagt "Puls", nicht "Herzratenvariabilitaet" - und
+Puls zeigt jede Uhr von Haus aus. HRV benennt genau das, was diese App misst
+und was sie von der Systemfunktion unterscheidet.
 
-NUR UMRISS, KEINE FLAECHE. Der Starter zeichnet Symbole einfarbig: eine rote
-Kapsel und ein violettes Herz kamen dort beide als graue Flecken heraus
-(nachgemessen im Emulator). Eine Linie traegt bei 25 Punkten mehr Form als
-eine Flaeche - und alle Symbole der Familie sehen damit gleich aus.
+Die Buchstaben sind aus Balken und Strecken gebaut, nicht gesetzt: eine
+Systemschrift steht auf der Uhr erst zur Laufzeit zur Verfuegung, ein Symbol
+muss aber schon im Bau fertig sein.
 
-DESHALB AUCH KEINE ~bw-FASSUNG: sie waere Punkt fuer Punkt dieselbe Datei.
+MASSSTAB IST DAS SYSTEMSYMBOL. Die Uhr-Kachel von "Watchfeces" im Starter wurde
+Punkt fuer Punkt nachgemessen: 24 von 25 Punkten hoch, Linien 2 bis 3 Punkte
+stark, rund 180 schwarze Punkte. Danach richten sich Groesse und Strichstaerke
+hier - eine duennere Linie sieht daneben aus wie ein Versehen.
 
-Kein Pulsstrich: bei 25 Punkten waere er zwei Punkte breit und liesse das
-Herz zerfallen.
+NUR LINIEN, KEINE FLAECHE, und keine ~bw-Fassung. Der Starter zeichnet Symbole
+einfarbig: eine farbige Flaeche kam dort als grauer Fleck heraus (im Emulator
+nachgemessen - Rot 255,0,0 wurde zu Grau 171,171,171). Eine schwarze Linie ist
+auf jeder Uhr dieselbe Datei.
+
+Drei Buchstaben auf 25 Punkten sind eng. Deshalb 7 Punkte je Buchstabe, ein
+Punkt Abstand, und Versalhoehe 17 - das fuellt den Kasten so weit wie das
+Vorbild, ohne dass die Innenraeume zulaufen.
 """
 import os
 import struct
@@ -25,11 +33,16 @@ import zlib
 
 W = H = 25
 SS = 4                           # Ueberabtastung je Achse
+LINE = 2                         # Strichstaerke in Punkten, wie beim Vorbild
 
-HW = 22.0                        # Breite des Herzens
-R = HW / 4.0                     # wie in der App: r = w / 4
-CX, CY = 12.0, 9.5
-
+# Drei Buchstaben sind dichter als eine Umrisszeichnung: mit Versalhoehe 20 kam
+# HRV auf 256 schwarze Punkte gegen 180 beim Vorbild. Eine Spur kleiner bringt
+# es in dieselbe Gegend, ohne dass die Innenraeume zulaufen.
+TOP, BOT = 3.0, 21.0             # Versalhoehe
+LW = LINE / 2.0 - 0.15           # halbe Strichstaerke; die Schraegen laufen
+                                 # sonst breiter als die geraden Balken
+ADV = 8.0                        # Vorschub je Buchstabe
+X0 = 0.5                         # linker Rand des ersten Buchstabens
 
 
 def png(path, w, h, rows):
@@ -45,31 +58,8 @@ def png(path, w, h, rows):
         f.write(out)
 
 
-def in_circle(x, y, cx, cy, r):
-    return (x - cx) ** 2 + (y - cy) ** 2 <= r * r
-
-
-def in_triangle(x, y, a, b, c):
-    """Liegt der Punkt im Dreieck? Ueber das Vorzeichen der drei Kanten."""
-    def side(p, q):
-        return (q[0] - p[0]) * (y - p[1]) - (q[1] - p[1]) * (x - p[0])
-    d1, d2, d3 = side(a, b), side(b, c), side(c, a)
-    return not ((d1 < 0 or d2 < 0 or d3 < 0) and (d1 > 0 or d2 > 0 or d3 > 0))
-
-
-def inside(x, y):
-    top = CY - R / 2.0
-    if in_circle(x, y, CX - R, top, R) or in_circle(x, y, CX + R, top, R):
-        return True
-    return in_triangle(x, y, (CX - 2 * R, top), (CX + 2 * R, top),
-                       (CX, CY + HW / 2.0))
-
-
-
-def solid():
-    """Die gefuellte Form, vierfach ueberabgetastet und bei halber Deckung
-    geschnitten. Harte Kanten, keine Zwischentoene - so halten es die
-    Schwesterapps."""
+def raster(test):
+    """Vierfach ueberabtasten, bei halber Deckung schneiden. Harte Kanten."""
     grid = []
     for py in range(H):
         row = []
@@ -77,57 +67,80 @@ def solid():
             hits = 0
             for sy in range(SS):
                 for sx in range(SS):
-                    if inside(px + (sx + 0.5) / SS, py + (sy + 0.5) / SS):
+                    if test(px + (sx + 0.5) / SS, py + (sy + 0.5) / SS):
                         hits += 1
             row.append(hits * 2 >= SS * SS)
         grid.append(row)
     return grid
 
 
-def outline(grid):
-    """Der Rand der Form: gefuellte Punkte, die an einen freien grenzen.
-
-    Auf Bildpunktebene gerechnet, nicht durch Schrumpfen der Flaeche - so ist
-    die Linie ueberall GENAU einen Punkt breit, auch in flachen Winkeln.
-    """
-    out = []
+def write(dest, grid):
+    rows = []
     for y in range(H):
-        row = []
+        r = []
         for x in range(W):
-            if not grid[y][x]:
-                row.append(False)
-                continue
-            edge = False
-            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
-                nx, ny = x + dx, y + dy
-                if nx < 0 or ny < 0 or nx >= W or ny >= H or not grid[ny][nx]:
-                    edge = True
-                    break
-            row.append(edge)
-        out.append(row)
-    return out
+            r += [0, 0, 0, 255] if grid[y][x] else [0, 0, 0, 0]
+        rows.append(r)
+    png(os.path.join(dest, "system_icon.png"), W, H, rows)
+    old = os.path.join(dest, "system_icon~bw.png")
+    if os.path.exists(old):
+        os.remove(old)
+        print("system_icon~bw.png entfernt - die Linie gilt fuer alle Uhren")
+    n = sum(1 for r in grid for v in r if v)
+    ys = [y for y in range(H) if any(grid[y])]
+    print("system_icon.png: %d Punkte schwarz, %d hoch (Vorbild: 180 / 24)"
+          % (n, (ys[-1] - ys[0] + 1) if ys else 0))
+
+
+def seg(x, y, ax, ay, bx, by, r):
+    """Liegt der Punkt hoechstens r von der Strecke a-b entfernt?"""
+    dx, dy = bx - ax, by - ay
+    L2 = dx * dx + dy * dy
+    t = 0.0 if L2 == 0 else ((x - ax) * dx + (y - ay) * dy) / L2
+    t = max(0.0, min(1.0, t))
+    ex, ey = x - (ax + t * dx), y - (ay + t * dy)
+    return ex * ex + ey * ey <= r * r
+
+
+def bar(x, y, x0, y0, x1, y1):
+    """Ein gerades Balkenstueck, Ecken eingeschlossen."""
+    return x0 <= x <= x1 and y0 <= y <= y1
+
+
+def glyph_h(x, y, ox):
+    """H: zwei Stiele und ein Querbalken."""
+    mid = (TOP + BOT) / 2.0
+    return (bar(x, y, ox, TOP, ox + LINE - 1, BOT)
+            or bar(x, y, ox + 5, TOP, ox + 5 + LINE - 1, BOT)
+            or bar(x, y, ox, mid - LW, ox + 5 + LINE - 1, mid + LW - 1))
+
+
+def glyph_r(x, y, ox):
+    """R: Stiel, Kopf, Querbalken, Bein."""
+    waist = TOP + (BOT - TOP) * 0.45
+    return (bar(x, y, ox, TOP, ox + LINE - 1, BOT)
+            or bar(x, y, ox, TOP, ox + 5 + LINE - 1, TOP + LINE - 1)
+            or bar(x, y, ox + 5, TOP, ox + 5 + LINE - 1, waist)
+            or bar(x, y, ox, waist - LW, ox + 5 + LINE - 1, waist + LW - 1)
+            or seg(x, y, ox + 3, waist, ox + 5 + LW, BOT, LW))
+
+
+def glyph_v(x, y, ox):
+    """V: zwei Schraegen, die sich unten treffen."""
+    return (seg(x, y, ox + LW, TOP, ox + 3 + LW, BOT, LW)
+            or seg(x, y, ox + 6 + LW, TOP, ox + 3 + LW, BOT, LW))
+
+
+def inside(x, y):
+    return (glyph_h(x, y, X0)
+            or glyph_r(x, y, X0 + ADV)
+            or glyph_v(x, y, X0 + 2 * ADV))
 
 
 def main():
     dest = sys.argv[1] if len(sys.argv) > 1 else "resources/images"
     os.makedirs(dest, exist_ok=True)
-    grid = solid()
-    line = outline(grid)
-
-    rows = []
-    for y in range(H):
-        r = []
-        for x in range(W):
-            r += [0, 0, 0, 255] if line[y][x] else [0, 0, 0, 0]
-        rows.append(r)
-    png(os.path.join(dest, "system_icon.png"), W, H, rows)
-    # Eine alte ~bw-Fassung waere jetzt identisch und nur noch Ballast.
-    old = os.path.join(dest, "system_icon~bw.png")
-    if os.path.exists(old):
-        os.remove(old)
-        print("system_icon~bw.png entfernt - die Kontur gilt fuer alle Uhren")
-    print("system_icon.png: %dx%d, %d Punkte Linie"
-          % (W, H, sum(1 for r in line for v in r if v)))
+    write(dest, raster(inside))
 
 
 if __name__ == "__main__":
