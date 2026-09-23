@@ -1,7 +1,7 @@
 {
   "name": "herzintervall",
   "author": "dysseus-pascal",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "license": "CC0-1.0",
   "keywords": [
     "pebble-app"
@@ -14,7 +14,9 @@
     "sdkVersion": "3",
     "enableMultiJS": true,
     "targetPlatforms": [
-      "emery"
+      "emery",
+      "flint",
+      "gabbro"
     ],
     "watchapp": {
       "watchface": false

@@ -19,6 +19,15 @@ Schrift, dunkle Seitenleiste rechts.
 | ![Ergebnis](screenshots/emery/04-ergebnis.png) | ![Deutsch](screenshots/emery/06-ergebnis-de.png) | ![Kein HRV](screenshots/emery/05-kein-hrv.png) |
 | Ergebnis | dasselbe auf Deutsch | Uhr ohne HRV |
 
+## Drei Uhren
+
+Seit 0.7.1 baut die pbw für **emery, flint und gabbro**. Der Schirm rechnet
+alles aus der Fensterbreite (wie die Schwesterapps): auf flint (144×168,
+schwarzweiss) rücken die Schriften eine Stufe kleiner, auf gabbro (rund)
+bekommen die Zeilen mehr Luft an den Seiten. HRV braucht einen Pulsmesser, der
+Schlagabstände liefert — auf einer Uhr ohne bleibt die Messung leer, die App
+sagt es.
+
 ## Bedienung
 
 Ein Bildschirm, eine Taste.
