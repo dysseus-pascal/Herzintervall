@@ -65,6 +65,25 @@ Geprüft mit `tools/test_night.sh`: Wecker in einer Minute statt um fünf, Messu
 öffnet sie wieder, Messung läuft, Ergebnis geht ans Telefon, App schliesst sich,
 Uhr zurück auf dem Zifferblatt.
 
+## Die Nacht fährt mit
+
+Seit 0.7.0 schickt die Uhr mit dem Ergebnis auch die **letzte abgeschlossene
+Nacht** — Schlafbeginn, Schlafende, erholsame Sekunden — und den **mittleren
+Puls dieser Nacht** als Ruhepuls (`SLEEP_START`, `SLEEP_END`, `SLEEP_RESTFUL`,
+`RESTING_HR`). Herzintervall zeigt davon nichts; Kiesel-Helper hört mit und
+trägt beides in die Gesundheitsakte ein.
+
+**Um fünf schläft man noch.** Die Nacht, die gerade läuft, ist nicht zu Ende;
+geschickt wird die letzte abgeschlossene (`health_service_activities_iterate`
+über `HealthActivitySleep`, die letzten 48 Stunden, seit mindestens einer
+Stunde vorbei), also meist die von gestern. Sie kommt einen Tag versetzt an,
+aber mit ihren echten Zeiten, und in der Akte steht sie am richtigen Tag.
+
+Einen eigenen Ruhepuls kennt das SDK nicht; der mittlere Puls im Schlaf
+(`health_service_aggregate_averaged`) ist die nächstliegende Zahl dazu. Und
+scheitert die Messung — lockeres Band, zu wenige saubere Schläge —, geht die
+Nacht trotzdem hinaus.
+
 ## Was gemessen wird
 
 **RMSSD** — die Wurzel aus dem Mittel der quadrierten Unterschiede
