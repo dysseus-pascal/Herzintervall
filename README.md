@@ -3,8 +3,8 @@
 Herzratenvariabilität auf der Uhr messen: eine Minute ruhig sitzen, am Ende
 steht der **RMSSD** in Millisekunden da.
 
-Die Oberfläche folgt der **Sprache der Uhr** (Deutsch und Englisch, Englisch als
-Rückfall) und dem Timeline-Look der Schwesterapps: weisser Grund, schwarze
+Die Oberfläche folgt der **Sprache der Uhr** (Deutsch, Englisch, Französisch,
+Italienisch und Spanisch, Englisch als Rückfall - siehe [Sprachen](#sprachen)) und dem Timeline-Look der Schwesterapps: weisser Grund, schwarze
 Schrift, dunkle Seitenleiste rechts.
 
 > **Nur Pebble Time 2.** Keine andere Uhr liefert Schlagintervalle — und der
@@ -215,6 +215,25 @@ braucht.
 - ob der 20-%-Filter bei starkem PPG-Rauschen zu streng ist. Liegt die Deckung
   dauerhaft niedrig bei gleichzeitig wenigen verworfenen, liefert der Sensor zu
   wenig; sind viele verworfen, ist der Filter zu eng.
+
+## Sprachen
+
+Die App liest beim Start `i18n_get_system_locale()` und folgt der Sprache der
+Uhr. Ausgeliefert werden **Englisch**, **Deutsch**, **Französisch**,
+**Italienisch** und **Spanisch**; jede andere Uhrsprache bekommt Englisch.
+Verglichen werden nur die ersten zwei Buchstaben. Einen eigenen Sprachschalter
+gibt es nicht.
+
+Alle Texte der Uhr stehen in `src/c/strings_table.h`, eine Zeile je Text und
+eine Spalte je Sprache (`STR(schluessel, maxbytes, en, de, fr, it, es)`).
+`node tools/strings_check.js` prüft Puffergrenzen, leere Spalten und
+abweichende Formatplatzhalter. Wo die Seitenleiste nur 30 Pixel breit ist,
+steht ein kurzes Wort („Lancer“, „Avvia“, „Medir“) statt einer wörtlichen
+Übersetzung. HRV und RMSSD bleiben unübersetzt.
+
+Eine Konfigseite und Timeline-Pins hat Herzintervall nicht, auf dem Telefon
+gibt es also nichts zu übersetzen. Die Companion-App unter `companion/` bleibt
+deutsch.
 
 ## Health Connect
 
