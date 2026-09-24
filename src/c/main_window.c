@@ -90,6 +90,27 @@ static void prv_canvas_update(Layer *layer, GContext *ctx) {
     return;
   }
 
+  // Im Ruhezustand steht statt des letzten Werts der Hinweis auf den Umzug:
+  // Nachtmessung und Einminutenmessung gibt es jetzt in Kieselsport. Die
+  // Einminutenmessung hier geht weiter (Mitteltaste), Messung und Ergebnis
+  // sehen aus wie bisher - nur wer die App oeffnet, soll erfahren, dass er
+  // sie nicht mehr braucht.
+  if (phase == HrvIdle) {
+    graphics_context_set_text_color(ctx, HZ_COLOR_BIG);
+    graphics_draw_text(ctx, S(STR_MOVED),
+                       fonts_get_system_font(wide ? FONT_KEY_GOTHIC_24_BOLD
+                                                  : FONT_KEY_GOTHIC_18_BOLD),
+                       GRect(margin, y, col_w, wide ? 84 : 66),
+                       GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+    y += wide ? 86 : 68;
+    graphics_context_set_text_color(ctx, HZ_COLOR_DIM);
+    graphics_draw_text(ctx, S(STR_MOVED_SUB),
+                       fonts_get_system_font(wide ? FONT_KEY_GOTHIC_18 : FONT_KEY_GOTHIC_14),
+                       GRect(margin, y, col_w, b.size.h - y - 4),
+                       GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+    return;
+  }
+
   // Kennzeile ueber der grossen Zahl
   const char *label;
   if (phase == HrvMeasuring) label = S(STR_MEASURING);

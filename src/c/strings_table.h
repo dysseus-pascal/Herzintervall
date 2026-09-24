@@ -31,6 +31,12 @@ STR(STR_NO_READING,    0,  "No reading yet",    "Noch keine Messung", "Aucune me
 STR(STR_LAST,          0,  "Last measurement",  "Letzte Messung", "Dernière mesure", "Ultima misura", "Última medición")
 STR(STR_SIT_STILL,     0,  "Sit still, then press",  "Ruhig sitzen, dann drücken", "Reste assis, puis appuie", "Stai fermo, poi premi", "Quédate quieto y pulsa")
 
+// --- Umzug nach Kieselsport ---
+// Steht im Ruhezustand statt des letzten Werts. Kurz, weil flint nur rund
+// 100 px Spaltenbreite hat; der Titel darf dort auf drei Zeilen umbrechen.
+STR(STR_MOVED,         0,  "Now part of Kieselsport", "Jetzt Teil von Kieselsport", "Désormais dans Kieselsport", "Ora parte di Kieselsport", "Ahora parte de Kieselsport")
+STR(STR_MOVED_SUB,     0,  "This app can be deleted.", "Diese App kann gelöscht werden.", "Cette app peut être supprimée.", "Questa app può essere eliminata.", "Esta app se puede borrar.")
+
 // --- Messung laeuft ---
 STR(STR_MEASURING,     0,  "Measuring",         "Messung läuft", "Mesure en cours", "Misura in corso", "Midiendo")
 STR(STR_WAITING,       0,  "Waiting for beats", "Warte auf Schläge", "Attente du pouls", "Attendo i battiti", "Esperando latidos")

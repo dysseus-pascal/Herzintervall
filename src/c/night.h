@@ -13,6 +13,10 @@
 // kaeme zwar an den Sensor, aber nicht an AppMessage. Um fuenf Uhr geht also
 // kurz der Schirm an. Danach beendet sich die App von selbst wieder.
 
+// SEIT 0.9.0 STILLGELEGT: die Nachtmessung macht jetzt Kieselsport (siehe
+// herzintervall.c). night_schedule() wird nicht mehr gerufen; die Datei
+// bleibt nur, damit ein alter Wecker noch erkannt wird.
+
 // Naechsten Wecker stellen. Bei jedem Start rufen - dann haelt er sich
 // selbst aktuell, auch ueber Zeitumstellungen und Neustarts hinweg.
 void night_schedule(void);

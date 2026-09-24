@@ -47,17 +47,20 @@ static void prv_init(void) {
   hrv_init(main_window_refresh);
   main_window_push();
 
-  // Hat uns der Wecker geoeffnet, sofort messen - drei Minuten statt einer.
-  // Die App schliesst sich danach von selbst wieder (siehe hrv.c).
-  //
-  // Der Wecker wird bei JEDEM Start neu gestellt, nicht nur hier: so haelt er
-  // sich selbst aktuell, auch nach einem Neustart der Uhr oder einer
-  // Zeitumstellung, und es sammeln sich keine alten an.
+  // DIE NACHT MISST JETZT KIESELSPORT. Dessen Hintergrund-Worker kommt die
+  // ganze Nacht an den Sensor, ohne dass der Schirm angeht - das konnte diese
+  // App nie. Liefen beide, wuerde die Uhr um fuenf doppelt messen und
+  // Kiesel-Helper zwei Naechte bekommen. Deshalb bei JEDEM Start alle eigenen
+  // Wecker abraeumen und keine neuen stellen: ein Wecker aus einer frueheren
+  // Fassung ueberlebt das Update, erst dieser Aufruf wird ihn los.
+  wakeup_cancel_all();
+
+  // Hat uns trotzdem noch ein alter Wecker geoeffnet, nicht messen, sondern
+  // still wieder gehen - wer um fuenf schlaeft, will keinen Schirm sehen.
   if (night_launched_us()) {
-    APP_LOG(APP_LOG_LEVEL_INFO, "Vom Wecker geoeffnet - Nachtmessung");
-    hrv_start_night();
+    APP_LOG(APP_LOG_LEVEL_INFO, "Alter Wecker - keine Nachtmessung mehr");
+    window_stack_pop_all(false);
   }
-  night_schedule();
 }
 
 static void prv_deinit(void) {

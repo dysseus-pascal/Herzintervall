@@ -1,5 +1,13 @@
 # Herzintervall
 
+> **Herzintervall ist jetzt Teil von Kieselsport.** Nachtmessung (HRV, Schlaf,
+> Ruhepuls) und die Einminutenmessung macht ab sofort
+> [Kieselsport](https://github.com/dysseus-pascal/Kieselsport). 0.9.0 ist die
+> letzte Version: sie stellt keine Wecker mehr, räumt alte ab und sagt auf dem
+> Schirm, dass die App gelöscht werden kann. Kiesel-Helper hört ab seiner
+> nächsten Version nicht mehr auf Herzintervall. Der Rest dieser Seite
+> beschreibt den Stand bis 0.8.0.
+
 Herzratenvariabilität auf der Uhr messen: eine Minute ruhig sitzen, am Ende
 steht der **RMSSD** in Millisekunden da.
 
